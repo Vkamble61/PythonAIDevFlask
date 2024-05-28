@@ -62,6 +62,7 @@ data = [
 @app.route("/")
 def index():
     return "Hello World!!!"
+
 #Test the endpoint 
 #>>>python -m flask run
 #>>>curl -X GET -i -w '\n' localhost:5000
@@ -73,8 +74,9 @@ def no_content():
     # Even though you returned a JSON message, it is not sent back to 
     # the client as 204. By default, nothing is returned.
     return ({"Message":"No Content Found"},204)
+
 #Test the endpoint 
-#curl -X GET -i -w '\n' localhost:5000/no_content
+#>>>curl -X GET -i -w '\n' localhost:5000/no_content
 
 #Send custom HTTP code back with the make_response() method. Import make_response() 
 @app.route("/exp")
@@ -84,7 +86,7 @@ def index_explicit():
     return resp
 
 #Test the server
-#curl -X GET -i -w '\n' localhost:5000/exp
+#>>>curl -X GET -i -w '\n' localhost:5000/exp
 #The output similar to --> status of 200, Content-Type of application/json, and JSON output of {"message": "Hello World"}:
 
 #create an end point that returns the person’s data to the client in JSON format.
@@ -94,11 +96,12 @@ def get_data():
         if data and len(data) > 0:
             return {"message":f"Data of length {len(data)} found"}
         else:
-            return {"message":"Data is empty"}, 500
+            return ({"message":"Data is empty"}, 500)
     except NameError:
-        return {"message": "Data not found"}, 404
+        return ({"message": "Data not found"}, 404)
+    
 #test the endpoint
-#curl -X GET -i -w '\n' localhost:5000/data
+#>>>curl -X GET -i -w '\n' localhost:5000/data
 
 #import request
 @app.route("/name_search")
@@ -113,3 +116,12 @@ def name_search():
             return person
         
     return ({"message":"person not found"}, 404)
+
+#test the endpoint
+#JSON output of person with first name Tanya:
+#>>>curl -X GET -i -w '\n' localhost:5000/name_search?q=Tanya 
+# the method returns HTTP 422 if the argument q is missing
+#>>>curl -X GET -i -w '\n' "localhost:5000/name_search" 
+# the first_name is not present in our list of people: message: Person not found will be displayed
+#>>>curl -X GET -i -w '\n' "localhost:5000/name_search?q=qwerty"
+
