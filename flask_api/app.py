@@ -1,6 +1,6 @@
 from flask import Flask, make_response, request
 app = Flask(__name__)
-
+#Following data is genrated by  Mockaroo.
 data = [
     {
         "id": "3b58aade-8415-49dd-88db-8d7bce14932a",
@@ -125,3 +125,68 @@ def name_search():
 # the first_name is not present in our list of people: message: Person not found will be displayed
 #>>>curl -X GET -i -w '\n' "localhost:5000/name_search?q=qwerty"
 
+#count
+@app.route("/count")
+def count():
+    try: 
+        return ({"data count": len(data)}, 200)
+    except NameError:
+        return ({"message":"data not defined"}, 500)
+
+#Test endpoint
+#>>>curl -X GET -i -w '\n' "localhost:5000/count"
+
+#find by uuid
+@app.route("/person/<uuid:id>")
+def find_by_uuid(id):
+    for person in data:
+        if person["id"] == str(id):
+            return person
+    return ({"message":"person not found"},404)        
+
+#Test 
+#curl -X GET -i localhost:5000/person/66c09925-589a-43b6-9a5d-d1601cf53287
+
+#Delete
+@app.route("/person/<uuid:id>", methods=['DELETE'])
+def delete_by_uuid(id):
+    for person in data:
+        if person["id"] == str(id):
+            data.remove(person)
+            return {"message":f"{id}"}, 200
+    return {"message": "person not found"}, 404
+#>>>curl -X DELETE -i localhost:5000/person/11111111-589a-43b6-9a5d-d1601cf51111
+
+#add user
+@app.route("/person", methods=['POST'])
+def add_by_uuid():
+    new_person = request.json
+    if not new_person:
+        return {"message": "Invalid input parameter"}, 422
+    # code to validate new_person ommited
+    try:
+        data.append(new_person)
+    except NameError:
+        return {"message": "data not defined"}, 500
+    return {"message": f"{new_person['id']}"}, 200
+
+#curl -X POST -i -w '\n' --url http://localhost:5000/person   --header 'Content-Type: application/json' \
+# --data '{
+#        "id": "4e1e61b4-8a27-11ed-a1eb-0242ac120002",
+#        "first_name": "John",
+#        "last_name": "Horne",
+#        "graduation_year": 2001,
+#        "address": "1 hill drive",
+#        "city": "Atlanta",
+#       "zip": "30339",
+#        "country": "United States",
+#        "avatar": "http://dummyimage.com/139x100.png/cc0000/ffffff"
+#}'
+
+#curl -X POST -i -w '\n'   --url http://localhost:5000/person   --header 'Content-Type: application/json'   --data '{}'
+#Error handler
+@app.errorhandler(404)
+def api_not_found(error):
+    return {"message": "API not found"}, 404
+#>>>curl -X POST -i -w '\n' http://localhost:5000/notvalid
+#
